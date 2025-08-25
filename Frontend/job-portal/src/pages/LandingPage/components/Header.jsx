@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Briefcase, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 
 const Header = () => {
-    const isAuthenticated = true;
-    const user = { FullName: "Prakash KC", role: "employer" };
+    const {user, isAuthenticated} = useAuth()
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -82,7 +82,7 @@ const Header = () => {
                     {/* Desktop Auth Buttons */}
                     <div className="hidden md:flex items-center space-x-3">
                         {isAuthenticated && (
-                            <span className="text-gray-700 mr-2">Welcome, {user.FullName}</span>
+                            <span className="text-gray-700 mr-2">Welcome, {user?.name || ""}</span>
                         )}
                         {authLinks.map((link, index) => (
                             <motion.button
