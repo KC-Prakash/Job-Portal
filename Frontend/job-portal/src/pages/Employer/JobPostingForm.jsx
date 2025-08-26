@@ -1,7 +1,7 @@
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AlertCircle, MapPin, DollarSign, Users, Eye, Send, Briefcase } from "lucide-react";
+import { AlertCircle, MapPin, DollarSign, Users, Eye, Send, Briefcase, X } from "lucide-react";
 import { API_PATHS } from '../../utils/apiPaths';
 import axiosInstance from '../../utils/axiosInstance';
 import { JOB_CATEGORIES, JOB_TYPES } from '../../utils/data';
@@ -16,7 +16,7 @@ const JobPostingForm = () => {
   const location = useLocation();
   const jobId = location.state?.jobId || null;
 
-  const [formData, setFormData] = useState({
+  const initialState = {
     jobTitle: "",
     location: "",
     category: "",
@@ -26,25 +26,26 @@ const JobPostingForm = () => {
     salaryMin: "",
     salaryMax: "",
     postedAt: new Date(),
-  });
+  };
 
+  const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-
-    // Clear error when user starts typing
+    // Clear field-specific errors
     if (errors[field] || errors.salary) {
       setErrors(prev => ({ ...prev, [field]: "", salary: "" }));
     }
   };
 
-  // Form validation helper
+  // Form validation
   const validateForm = (data) => {
     const errors = {};
     if (!data.jobTitle.trim()) errors.jobTitle = "Job title is required";
+    if (!data.location.trim()) errors.location = "Job location is required";
     if (!data.category) errors.category = "Job category is required";
     if (!data.jobType) errors.jobType = "Job type is required";
     if (!data.description.trim()) errors.description = "Job description is required";
@@ -55,6 +56,7 @@ const JobPostingForm = () => {
     } else if (parseInt(data.salaryMin) >= parseInt(data.salaryMax)) {
       errors.salary = "Maximum salary must be greater than minimum salary";
     }
+
     return errors;
   };
 
@@ -62,7 +64,7 @@ const JobPostingForm = () => {
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      toast.error("Please fix errors before previewing");
+      toast.error("Please fill the highlighted fields before previewing.");
       return;
     }
     setIsPreview(true);
@@ -73,18 +75,18 @@ const JobPostingForm = () => {
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      toast.error("Please fix errors before submitting");
+      toast.error("Please fill the highlighted fields before submitting.");
       return;
     }
 
     setIsSubmitting(true);
     const jobPayload = {
       title: formData.jobTitle,
-      description: formData.description,
-      requirements: formData.requirements,
       location: formData.location,
       category: formData.category,
       type: formData.jobType,
+      description: formData.description,
+      requirements: formData.requirements,
       salaryMin: formData.salaryMin,
       salaryMax: formData.salaryMax,
     };
@@ -96,16 +98,7 @@ const JobPostingForm = () => {
 
       if (response.status === 200 || response.status === 201) {
         toast.success(jobId ? "Job updated successfully" : "Job posted successfully");
-        setFormData({
-          jobTitle: "",
-          location: "",
-          category: "",
-          jobType: "",
-          description: "",
-          requirements: "",
-          salaryMin: "",
-          salaryMax: "",
-        });
+        setFormData(initialState);
         navigate("/employer-dashboard");
       }
     } catch (error) {
@@ -133,14 +126,15 @@ const JobPostingForm = () => {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  Post a New Job
+                  {jobId ? "Edit Job" : "Post a New Job"}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Fill out the form below to create your job posting
+                  Fill out the form below to {jobId ? "update your job posting" : "create your job posting"}
                 </p>
               </div>
               <button
                 onClick={handlePreview}
+                disabled={isSubmitting}
                 className="group flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-600 hover:text-white bg-white/50 hover:bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl border border-gray-200 hover:border-gray-100 transition-colors duration-300"
               >
                 <Eye className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
@@ -159,7 +153,7 @@ const JobPostingForm = () => {
                 error={errors.jobTitle}
                 required
                 icon={Briefcase}
-                clearable 
+                clearable
               />
 
               {/* Location */}
@@ -171,7 +165,7 @@ const JobPostingForm = () => {
                 onChange={(e) => handleInputChange("location", e.target.value)}
                 error={errors.location}
                 icon={MapPin}
-                clearable 
+                clearable
               />
 
               {/* Category & Job Type */}
@@ -186,7 +180,6 @@ const JobPostingForm = () => {
                   error={errors.category}
                   required
                   icon={Users}
-                  clearable 
                 />
                 <SelectField
                   label="Job Type"
@@ -211,6 +204,7 @@ const JobPostingForm = () => {
                 error={errors.description}
                 helperText="Include key responsibilities, day-to-day tasks, and relevant details."
                 required
+                clearable
               />
 
               {/* Requirements */}
@@ -223,6 +217,7 @@ const JobPostingForm = () => {
                 error={errors.requirements}
                 helperText="Include required skills, experience, education, and preferred qualifications."
                 required
+                clearable
               />
 
               {/* Salary Range */}
@@ -264,24 +259,37 @@ const JobPostingForm = () => {
                 )}
               </div>
 
-              {/* Submit Button */}
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="w-full flex items-center justify-center px-4 py-2.5 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mt-4"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Publishing Job...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-5 w-5 mr-2" />
-                    Publish Job
-                  </>
-                )}
-              </button>
+              {/* Buttons */}
+              <div className="flex gap-4 mt-4">
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center px-4 py-2.5 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Publishing Job...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Publish Job
+                    </>
+                  )}
+                </button>
+
+                <button
+  type="button"
+  onClick={() => setFormData(initialState)}
+  disabled={isSubmitting}
+  className="flex items-center justify-center gap-2 flex-1 px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors"
+>
+  <X className="h-5 w-5" />
+  <span>Cancel</span>
+</button>
+
+              </div>
             </div>
           </div>
         </div>

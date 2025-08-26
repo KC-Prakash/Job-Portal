@@ -1,4 +1,4 @@
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, X } from "lucide-react";
 
 const InputField = ({
     label,
@@ -12,6 +12,7 @@ const InputField = ({
     required = false,
     disabled = false,
     icon: Icon,
+    clearable = false,
     ...props
 }) => {
     return (
@@ -20,12 +21,14 @@ const InputField = ({
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
             </label>
+
             <div className="relative">
                 {Icon && (
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Icon className="h-5 w-5 text-green-400" />
                     </div>
                 )}
+
                 <input
                     id={id}
                     type={type}
@@ -33,28 +36,37 @@ const InputField = ({
                     value={value}
                     onChange={onChange}
                     disabled={disabled}
-                    className={`w-full ${Icon ? "pl-10" : "pl-3"} pr-3 py-2.5 border rounded-lg text-base transition-colors duration-200 disabled:bg-gray-50 disabled:text-gray-500 ${
-                        error
-                            ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                    } focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                    className={`w-full ${Icon ? "pl-10" : "pl-3"} ${clearable ? "pr-10" : "pr-3"} py-2.5 border rounded-lg text-base transition-colors duration-200 disabled:bg-gray-50 disabled:text-gray-500 ${error ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        } focus:outline-none focus:ring-2 focus:ring-offset-2`}
                     {...props}
                 />
+
+                {/* Clear button */}
+                {clearable && value && !disabled && (
+                    <button
+                        type="button"
+                        onClick={() => onChange({ target: { value: "" } })}
+                        className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
+                            <X className="w-4 h-4" />
+                        </div>
+                    </button>
+                )}
             </div>
 
-            {/* Move error outside the relative div to avoid pushing the icon */}
             {error && (
                 <div className="flex items-center space-x-1 text-sm text-red-600 mt-1">
-                    <AlertCircle className="h-4 w-4" />
+                    <AlertCircle className="w-4 h-4" />
                     <span>{error}</span>
                 </div>
             )}
 
             {helperText && !error && (
-                <p className="text-sm text-gray-500">{helperText}</p>
+                <p className="text-sm text-gray-500 mt-1">{helperText}</p>
             )}
         </div>
-    )
-}
+    );
+};
 
-export default InputField
+export default InputField;
