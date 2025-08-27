@@ -1,5 +1,5 @@
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AlertCircle, MapPin, DollarSign, Users, Eye, Send, Briefcase, X } from "lucide-react";
 import { API_PATHS } from '../../utils/apiPaths';
@@ -109,6 +109,42 @@ const JobPostingForm = () => {
       setIsSubmitting(false);
     }
   };
+  
+  useEffect(() => {
+  const fetchJobDetails = async () => {
+    if (jobId) {
+      try {
+        const response = await axiosInstance.get(
+          API_PATHS.JOBS.GET_JOB_BY_ID(jobId)
+        );
+        const jobData = response.data;
+        if(jobData) {
+        setFormData({
+          jobTitle: jobData.title,
+          location: jobData.location,
+          category: jobData.category,
+          jobType: jobData.type,
+          description: jobData.description,
+          requirements: jobData.requirements,
+          salaryMin: jobData.salaryMin,
+          salaryMax: jobData.salaryMax,
+        });
+        }
+      } catch (error) {
+        console.error("Error fetching job details:");
+        if (error.response) {
+          console.error("API Error:", error.response.message);
+        }
+      }
+    }
+  };
+
+  fetchJobDetails();
+  return () => {
+
+  }
+}, [])
+
 
   if (isPreview) {
     return (

@@ -22,7 +22,7 @@ const Card = ({ title, subtitle, headerAction, className, children }) => {
   return <div
     className={`bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}>
     {(title || headerAction) && (
-      <div className="flex item-center justify-between p-6 pb-4">
+      <div className="flex items-center justify-between p-6 pb-4">
         <div>
           {title && (
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
@@ -62,7 +62,7 @@ const StatCard = ({
           {trend && (
             <div className="flex items-center mt-2 text-sm">
               <TrendingUp className="w-4 h-4 mr-1" />
-              <snap className="font-medium">{trendValue}</snap>
+              <span className="font-medium">{trendValue}</span>
             </div>
           )}
         </div>
