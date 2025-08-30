@@ -20,7 +20,8 @@ exports.applyToJob = async (req, res) => {
         const application = await Application.create({
             job: req.params.jobId,
             applicant: req.user._id,
-            resume: req.user.resume || "", 
+            resume: req.user.resume || "",
+            category: job.category,
         });
 
         return res.status(201).json(application);
@@ -33,7 +34,7 @@ exports.applyToJob = async (req, res) => {
 exports.getMyApplications = async (req, res) => {
     try {
         const apps = await Application.find({ applicant: req.user._id })
-            .populate("job", "title company location type")
+            .populate("job", "title company location type category")
             .sort({ createdAt: -1 });
 
         return res.json(apps);
