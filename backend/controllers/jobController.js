@@ -17,73 +17,62 @@ exports.createJob = async (req, res) => {
 };
 
 exports.getJobs = async (req, res) => {
-    const {
-        keyword,
-        location,
-        category,
-        type,
-        minSalary,
-        maxSalary,
-        userId,
-    } = req.query;
+    const { keyword, location, category, type, minSalary, maxSalary, userId } = req.query;
 
-    const query = {
-        isClosed: false,
-        ...(keyword && { title: { $regex: keyword, $options: "i" } }),
-        ...(location && { location: { $regex: location, $options: "i" } }),
-        ...(category && { category }),
-        ...(type && { type }),
-    };
+    const query = { isClosed: false };
 
-    if (minSalary || maxSalary) {
-        query.$and = [];
-        if (minSalary) {
-            query.$and.push({ salaryMax: { $get: Number(minSalary) } });
-        }
-        if (maxSalary) {
-            query.$and.push({ salaryMin: { $let: Number(maxSalary) } });
-        }
-        if (query.$and.length === 0) {
-            delete query.$and;
-        }
+    // Keyword filter
+    if (keyword) query.title = { $regex: keyword, $options: "i" };
+    if (location) query.location = { $regex: location, $options: "i" };
+
+    // Type filter (multiple checkboxes OR logic)
+    if (type) {
+        query.type = { $in: Array.isArray(type) ? type : [type] };
     }
+
+    // Category filter (multiple checkboxes OR logic)
+    if (category) {
+        query.category = { $in: Array.isArray(category) ? category : [category] };
+    }
+
+    // Salary range filter
+    const min = minSalary ? Number(minSalary) : null;
+    const max = maxSalary ? Number(maxSalary) : null;
+    if (min !== null || max !== null) {
+        query.$and = [];
+        if (min !== null) query.$and.push({ salaryMax: { $gte: min } });
+        if (max !== null) query.$and.push({ salaryMin: { $lte: max } });
+        if (query.$and.length === 0) delete query.$and;
+    }
+
     try {
-        const jobs = await Job.find(query).populate(
-            "company",
-            "Name companyName companyLogo"
-        );
+        const jobs = await Job.find(query).populate("company", "Name companyName companyLogo");
 
         let savedJobIds = [];
         let appliedJobStstusMap = {};
 
         if (userId) {
-            //Saved Jobs
             const savedJobs = await SavedJob.find({ jobseeker: userId }).select("job");
             savedJobIds = savedJobs.map((s) => String(s.job));
 
-            //Applied Jobs
             const applications = await Application.find({ applicant: userId }).select("job status");
             applications.forEach((app) => {
-                appliedJobStstusMap[String(app.job)] = app.status
+                appliedJobStstusMap[String(app.job)] = app.status;
             });
         }
 
-        // Add isSave and applicationStatus to each job
-        const jobsWithExtras = jobs.map((job) => {
-            const jobIdStr = String(job._id);
-            return {
-                ...job.toObject(),
-                isSave: savedJobIds.includes(jobIdStr),
-                applicationStatus: appliedJobStstusMap[jobIdStr] || null,
-            };
-        });
+        const jobsWithExtras = jobs.map((job) => ({
+            ...job.toObject(),
+            isSave: savedJobIds.includes(String(job._id)),
+            applicationStatus: appliedJobStstusMap[String(job._id)] || null,
+        }));
 
         res.json(jobsWithExtras);
-
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 // @desc Get jobs for logged in user (Employer can see posted jobs)
 exports.getJobsEmployer = async (req, res) => {
@@ -122,7 +111,7 @@ exports.getJobsEmployer = async (req, res) => {
 // @desc Get single job by id
 exports.getJobById = async (req, res) => {
     try {
-        const {userId} = req.query;
+        const { userId } = req.query;
 
         const job = await Job.findById(req.params.id).populate(
             "company",
@@ -161,17 +150,17 @@ exports.updateJob = async (req, res) => {
         const job = await Job.findById(req.params.id);
         if (!job) {
             return res.status(404).json({ error: "Job not found" });
-    }
+        }
 
         if (job.company.toString() !== req.user._id.toString()) {
             return res
-            .ststus(403)
-            .json({message: "You are not authorized to update this job"});
+                .ststus(403)
+                .json({ message: "You are not authorized to update this job" });
         }
 
         Object.assign(job, req.body);
         const updatedJob = await job.save();
-        
+
         return res.json(updatedJob);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -182,18 +171,18 @@ exports.updateJob = async (req, res) => {
 exports.deleteJob = async (req, res) => {
     try {
         const job = await Job.findById(req.params.id);
-        if(!job) {
-            return res.ststus(404).json({message: "Job not found"});
+        if (!job) {
+            return res.ststus(404).json({ message: "Job not found" });
         }
 
         if (job.company.toString() !== req.user._id.toString()) {
             return res
-            .ststus(403)
-            .json({message: "You are not authorized to delete this job"});
+                .ststus(403)
+                .json({ message: "You are not authorized to delete this job" });
         }
 
         await job.deleteOne();
-        res.json({message: "Job deleted successfully"});
+        res.json({ message: "Job deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -217,10 +206,10 @@ exports.toggleCloseJob = async (req, res) => {
         job.isClosed = !job.isClosed;
         await job.save();
 
-        res.json({ 
-            message: job.isClosed 
-                ? "Job marked as closed" 
-                : "Job reopened successfully" 
+        res.json({
+            message: job.isClosed
+                ? "Job marked as closed"
+                : "Job reopened successfully"
         });
     } catch (err) {
         res.status(500).json({ message: err.message });

@@ -16,4 +16,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ["axios"], 
   },
+  css: {
+    postcss: "./postcss.config.js",
+  },
 });

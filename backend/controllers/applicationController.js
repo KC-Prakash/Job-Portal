@@ -8,25 +8,24 @@ exports.applyToJob = async (req, res) => {
             return res.status(403).json({ message: "Only jobseekers can apply to jobs" });
         }
 
-        const existing = await Application.findOne({
-            job: req.params.jobId,
-            applicant: req.user._id,
-        });
+        const job = await Job.findById(req.params.jobId);
+        if (!job) return res.status(404).json({ message: "Job not found" });
 
-        if (existing) {
-            return res.status(400).json({ message: "You have already applied to this job" });
-        }
+        const existing = await Application.findOne({ job: job._id, applicant: req.user._id });
+        if (existing) return res.status(400).json({ message: "You have already applied to this job" });
 
         const application = await Application.create({
-            job: req.params.jobId,
+            job: job._id,
             applicant: req.user._id,
             resume: req.user.resume || "",
             category: job.category,
         });
 
-        return res.status(201).json(application);
+        const populatedApp = await application.populate("job", "title company location type category");
+        return res.status(201).json(populatedApp);
     } catch (err) {
-        return res.status(500).json({ message: err.message });
+        console.error(err);
+        return res.status(500).json({ message: "Failed to apply to job", error: err.message });
     }
 };
 

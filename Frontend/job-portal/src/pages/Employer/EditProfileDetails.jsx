@@ -16,7 +16,7 @@ const EditProfileDetails = ({
         <div className="min-h-screen bg-gray-50 py-8 px-8">
           <div className="max-w-6xl mx-auto">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              
+
               {/* Header with Save & Cancel */}
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 py-4 px-8 flex items-center justify-between">
                 <h1 className="text-lg md:text-xl font-medium text-white">
@@ -43,7 +43,7 @@ const EditProfileDetails = ({
 
               {/* Edit Form */}
               <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
+
                 {/* Personal Information */}
                 <div className="space-y-6">
                   <h2 className="text-lg font-medium text-gray-800 border-b pb-2">
@@ -77,8 +77,8 @@ const EditProfileDetails = ({
                     </label>
                   </div>
 
-                  {/* Name Input */}
-                  <div>
+                  {/* Full Name */}
+                  <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Full Name
                     </label>
@@ -90,6 +90,17 @@ const EditProfileDetails = ({
                                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your full name"
                     />
+                    {formData.name && (
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('name', '')}
+                        className="absolute inset-y-0 right-3 top-6 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
+                          <X className="w-4 h-4" />
+                        </div>
+                      </button>
+                    )}
                   </div>
 
                   {/* Email */}
@@ -141,7 +152,7 @@ const EditProfileDetails = ({
                   </div>
 
                   {/* Company Name */}
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Company Name
                     </label>
@@ -153,10 +164,21 @@ const EditProfileDetails = ({
                                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your company name"
                     />
+                    {formData.companyName && (
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('companyName', '')}
+                        className="absolute inset-y-0 right-3 top-6 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
+                          <X className="w-4 h-4" />
+                        </div>
+                      </button>
+                    )}
                   </div>
 
                   {/* Company Description */}
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Company Description
                     </label>
@@ -165,10 +187,22 @@ const EditProfileDetails = ({
                       onChange={(e) => handleInputChange('companyDescription', e.target.value)}
                       rows={4}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg 
-                                 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder="Enter your company description"
                     />
+                    {formData.companyDescription && (
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('companyDescription', '')}
+                        className="absolute top-3 right-3 top-11 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
+                          <X className="w-4 h-4" />
+                        </div>
+                      </button>
+                    )}
                   </div>
+
                 </div>
               </div>
             </div>
