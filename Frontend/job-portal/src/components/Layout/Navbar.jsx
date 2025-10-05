@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Briefcase, Bookmark } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/authContext';
 import ProfileDropdown from './ProfileDropdown';
 
 const Navbar = () => {
@@ -37,7 +37,7 @@ const Navbar = () => {
                         {user && (
                             <button
                                 className="p-2 rounded-xl hover:bg-gray-100 transition-colors duration-200 relative"
-                                onClick={() => navigate('saved-jobs')}
+                                onClick={() => navigate('/saved-jobs')}
                             >
                                 <Bookmark className="h-6 w-6 text-gray-600" />
                             </button>
