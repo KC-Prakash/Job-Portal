@@ -1,47 +1,47 @@
-import { ArrowLeft, Bookmark, Grid, List } from "lucide-react";
-import { useAuth } from "../../context/authContext";
-import { useNavigate } from "react-router-dom";
-import axiosInstance from '../../utils/axiosInstance';
-import { API_PATHS } from "../../utils/apiPaths";
-import { useEffect, useState } from "react";
-import Navbar from "../../components/Layout/Navbar";
-import JobCard from "../../components/Cards/JobCard";
-import toast from "react-hot-toast";
+import { ArrowLeft, Bookmark, Grid, List } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import JobCard from '../../components/Cards/JobCard'
+import Navbar from '../../components/Layout/Navbar'
+import { useAuth } from '../../context/AuthContext'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
 
 const SavedJobs = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
-  const [savedJobList, setSavedJobList] = useState([]); 
-  const [viewMode, setViewMode] = useState('grid');
+  const [savedJobList, setSavedJobList] = useState([])
+  const [viewMode, setViewMode] = useState('grid')
 
   // Fetch saved jobs
   const getSavedJobs = async () => {
     try {
-      const response = await axiosInstance.get(API_PATHS.JOBS.GET_SAVED_JOBS);
-      setSavedJobList(response.data);
+      const response = await axiosInstance.get(API_PATHS.JOBS.GET_SAVED_JOBS)
+      setSavedJobList(response.data)
     } catch (err) {
-      console.error("Error fetching jobs details:", err);
-      toast.error("Failed to fetch saved jobs.");
+      console.error('Error fetching jobs details:', err)
+      toast.error('Failed to fetch saved jobs.')
     }
-  };
+  }
 
   // Remove saved job
-  const handleUnsaveJob = async (jobId) => { 
+  const handleUnsaveJob = async (jobId) => {
     try {
-      await axiosInstance.delete(API_PATHS.JOBS.UNSAVE_JOB(jobId));
-      toast.success("Job removed successfully");
-      getSavedJobs();
+      await axiosInstance.delete(API_PATHS.JOBS.UNSAVE_JOB(jobId))
+      toast.success('Job removed successfully')
+      getSavedJobs()
     } catch (err) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.')
     }
-  };
+  }
 
   useEffect(() => {
     if (user) {
-      getSavedJobs();
+      getSavedJobs()
     }
-  }, [user]);
+  }, [user])
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-cyan-50">
@@ -71,9 +71,9 @@ const SavedJobs = () => {
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-lg transition-colors ${
-                      viewMode === "grid"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      viewMode === 'grid'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
                     <Grid className="h-5 w-5" />
@@ -82,9 +82,9 @@ const SavedJobs = () => {
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-lg transition-colors ${
-                      viewMode === "list"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      viewMode === 'list'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
                     <List className="h-5 w-5" />
@@ -114,17 +114,17 @@ const SavedJobs = () => {
                   </button>
                 </div>
               ) : (
-                <div 
+                <div
                   className={
                     viewMode === 'grid'
-                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-                      : "space-y-4 lg:space-y-6"
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                      : 'space-y-4 lg:space-y-6'
                   }
                 >
                   {savedJobList.map((savedJob) => (
-                    <JobCard 
-                      key={savedJob._id} 
-                      job={savedJob?.job} 
+                    <JobCard
+                      key={savedJob._id}
+                      job={savedJob?.job}
                       onClick={() => navigate(`/job/${savedJob?.job._id}`)}
                       onToggleSave={() => handleUnsaveJob(savedJob?.job._id)}
                       saved
@@ -137,7 +137,7 @@ const SavedJobs = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SavedJobs;
+export default SavedJobs

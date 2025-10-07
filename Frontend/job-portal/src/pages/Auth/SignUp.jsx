@@ -1,34 +1,34 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 import {
-  User,
-  Mail,
-  Lock,
-  Upload,
-  Eye,
-  EyeOff,
-  UserCheck,
+  AlertCircle,
   Building2,
   CheckCircle,
-  AlertCircle,
+  Eye,
+  EyeOff,
   Loader,
-  X
-} from 'lucide-react';
-import { validateAvatar, validateEmail, validatePassword } from '../../utils/helper';
-import { API_PATHS } from '../../utils/apiPaths';
-import axiosInstance from '../../utils/axiosInstance';
-import { useAuth } from '../../context/AuthContext';
-import uploadImage from '../../utils/uploadimage';
+  Lock,
+  Mail,
+  Upload,
+  User,
+  UserCheck,
+  X,
+} from 'lucide-react'
+import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
+import { validateAvatar, validateEmail, validatePassword } from '../../utils/helper'
+import uploadImage from '../../utils/uploadimage'
 
 const SignUp = () => {
-  const { login } = useAuth();
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    role: "",
+    fullName: '',
+    email: '',
+    password: '',
+    role: '',
     avatar: null,
-  });
+  })
 
   const [formState, setFormState] = useState({
     loading: false,
@@ -36,90 +36,89 @@ const SignUp = () => {
     showPassword: false,
     avatarPreview: null,
     success: false,
-  });
+  })
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+    const { name, value } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }));
+      [name]: value,
+    }))
 
     if (formState.errors[name]) {
-      setFormState(prev => ({
+      setFormState((prev) => ({
         ...prev,
-        errors: { ...prev.errors, [name]: "" }
-      }));
+        errors: { ...prev.errors, [name]: '' },
+      }))
     }
-  };
+  }
 
   const handleRoleChange = (role) => {
-    setFormData((prev) => ({ ...prev, role }));
+    setFormData((prev) => ({ ...prev, role }))
     if (formState.errors.role) {
-      setFormState(prev => ({
+      setFormState((prev) => ({
         ...prev,
-        errors: { ...prev.errors, role: "" }
-      }));
+        errors: { ...prev.errors, role: '' },
+      }))
     }
-  };
+  }
 
   const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
-      const error = validateAvatar(file);
+      const error = validateAvatar(file)
       if (error) {
         setFormState((prev) => ({
           ...prev,
           errors: { ...prev.errors, avatar: error },
-        }));
-        return;
+        }))
+        return
       }
 
-      setFormData((prev) => ({ ...prev, avatar: file }));
+      setFormData((prev) => ({ ...prev, avatar: file }))
 
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (e) => {
         setFormState((prev) => ({
           ...prev,
           avatarPreview: e.target.result,
-          errors: { ...prev.errors, avatar: "" },
-        }));
-      };
-      reader.readAsDataURL(file);
+          errors: { ...prev.errors, avatar: '' },
+        }))
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const validateForm = () => {
     const errors = {
-      fullName: !formData.fullName ? "Full Name is required" : "",
+      fullName: !formData.fullName ? 'Full Name is required' : '',
       email: validateEmail(formData.email),
       password: validatePassword(formData.password),
-      role: !formData.role ? "Please select a role" : "",
-      avatar: "",
-    };
+      role: !formData.role ? 'Please select a role' : '',
+      avatar: '',
+    }
 
-    Object.keys(errors).forEach(key => {
-      if (!errors[key]) delete errors[key];
-    });
+    Object.keys(errors).forEach((key) => {
+      if (!errors[key]) delete errors[key]
+    })
 
-    setFormState(prev => ({ ...prev, errors }));
+    setFormState((prev) => ({ ...prev, errors }))
 
-    return Object.keys(errors).length === 0;
-
-  };
+    return Object.keys(errors).length === 0
+  }
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
-    setFormState(prev => ({ ...prev, loading: true }));
+    setFormState((prev) => ({ ...prev, loading: true }))
 
     try {
-      let avatarUrl = "";
+      let avatarUrl = ''
 
       if (formData.avatar) {
-        const imgUploadRes = await uploadImage(formData.avatar);
-        avatarUrl = imgUploadRes.imageUrl || "";
+        const imgUploadRes = await uploadImage(formData.avatar)
+        avatarUrl = imgUploadRes.imageUrl || ''
       }
 
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
@@ -127,39 +126,36 @@ const SignUp = () => {
         email: formData.email,
         password: formData.password,
         role: formData.role,
-        avatar: avatarUrl || "",
-      });
+        avatar: avatarUrl || '',
+      })
 
       setFormState((prev) => ({
         ...prev,
         loading: false,
         success: true,
         errors: {},
-      }));
+      }))
 
-      const { token } = response.data;
+      const { token } = response.data
       if (token) {
-        login(response.data, token);
+        login(response.data, token)
 
         setTimeout(() => {
-          window.location.href =
-            formData.role === "employer"
-              ? '/employer-dashboard'
-              : '/find-jobs';
-        }, 2000);
+          window.location.href = formData.role === 'employer' ? '/employer-dashboard' : '/find-jobs'
+        }, 2000)
       }
     } catch (error) {
-      console.log("error", error);
+      console.log('error', error)
 
       setFormState((prev) => ({
         ...prev,
         loading: false,
         errors: {
-          submit: error.response?.data?.message || "Registration failed. Please try again."
+          submit: error.response?.data?.message || 'Registration failed. Please try again.',
         },
-      }));
+      }))
     }
-  };
+  }
 
   if (formState.success) {
     return (
@@ -178,7 +174,7 @@ const SignUp = () => {
           <p className="text-sm text-gray-500 mt-2">Redirecting to your dashboard.</p>
         </motion.div>
       </div>
-    );
+    )
   }
 
   return (
@@ -190,9 +186,7 @@ const SignUp = () => {
         className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full"
       >
         <div className="text-center mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Create Account
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Create Account</h2>
           <p className="text-sm text-gray-600">
             Join thousands of professionals finding their dream jobs.
           </p>
@@ -212,13 +206,15 @@ const SignUp = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${formState.errors.fullName ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                  formState.errors.fullName ? 'border-red-500' : 'border-gray-300'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="Enter your full name"
               />
               {formData.fullName && (
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, fullName: '' }))}
+                  onClick={() => setFormData((prev) => ({ ...prev, fullName: '' }))}
                   className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
@@ -248,13 +244,15 @@ const SignUp = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${formState.errors.email ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                  formState.errors.email ? 'border-red-500' : 'border-gray-300'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="Enter your email"
               />
               {formData.email && (
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, email: '' }))}
+                  onClick={() => setFormData((prev) => ({ ...prev, email: '' }))}
                   className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
@@ -279,19 +277,21 @@ const SignUp = () => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
-                type={formState.showPassword ? "text" : "password"}
+                type={formState.showPassword ? 'text' : 'password'}
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${formState.errors.password ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                  formState.errors.password ? 'border-red-500' : 'border-gray-300'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="Enter your password"
               />
               <div className="absolute top-1/2 right-3 transform -translate-y-1/2 flex space-x-1">
                 {formData.password && (
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, password: '' }))}
+                    onClick={() => setFormData((prev) => ({ ...prev, password: '' }))}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
@@ -301,11 +301,17 @@ const SignUp = () => {
                 )}
                 <button
                   type="button"
-                  onClick={() => setFormState(prev => ({ ...prev, showPassword: !prev.showPassword }))}
+                  onClick={() =>
+                    setFormState((prev) => ({ ...prev, showPassword: !prev.showPassword }))
+                  }
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
-                    {formState.showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {formState.showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </div>
                 </button>
               </div>
@@ -370,27 +376,29 @@ const SignUp = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => handleRoleChange("jobseeker")}
-                className={`p-4 rounded-lg border-2 transition-all ${formData.role === "jobseeker"
-                  ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 hover:border-gray-300"}`}
+                onClick={() => handleRoleChange('jobseeker')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  formData.role === 'jobseeker'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
               >
                 <UserCheck className="w-6 h-6 mx-auto mb-2" />
                 <div className="font-medium">Job Seeker</div>
-                <div className="text-xs text-gray-500">
-                  Looking for opportunities
-                </div>
+                <div className="text-xs text-gray-500">Looking for opportunities</div>
               </button>
               <button
                 type="button"
-                onClick={() => handleRoleChange("employer")}
-                className={`p-4 rounded-lg border-2 transition-all ${formData.role === "employer"
-                  ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 hover:border-gray-300"}`}
+                onClick={() => handleRoleChange('employer')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  formData.role === 'employer'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
               >
                 <Building2 className="w-6 h-6 mx-auto mb-2" />
                 <div className="font-medium">Employer</div>
-                <div className="text-xs text-gray-500">
-                  Hiring talents
-                </div>
+                <div className="text-xs text-gray-500">Hiring talents</div>
               </button>
             </div>
             {formState.errors.role && (
@@ -430,7 +438,7 @@ const SignUp = () => {
           {/* Login */}
           <div className="text-center">
             <p className="text-gray-600">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
                 Login here
               </a>
@@ -439,7 +447,7 @@ const SignUp = () => {
         </form>
       </motion.div>
     </div>
-  );
-};
+  )
+}
 
-export default SignUp;
+export default SignUp

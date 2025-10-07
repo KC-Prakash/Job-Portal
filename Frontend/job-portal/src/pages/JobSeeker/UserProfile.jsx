@@ -1,109 +1,106 @@
-import { useEffect, useState } from 'react';
-import { Save, X, Trash2 } from 'lucide-react';
-import { useAuth } from '../../context/authContext';
-import axiosInstance from '../../utils/axiosInstance';
-import { API_PATHS } from '../../utils/apiPaths';
-import toast from 'react-hot-toast';
-import uploadImage from '../../utils/uploadImage';
-import Navbar from '../../components/Layout/Navbar';
-import { Link } from 'react-router-dom';
+import { Save, Trash2, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
+import Navbar from '../../components/Layout/Navbar'
+import { useAuth } from '../../context/AuthContext'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
+import uploadImage from '../../utils/uploadImage'
 
 const UserProfile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser } = useAuth()
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     avatar: user?.avatar || '',
     resume: user?.resume || '',
-  });
+  })
 
-  const [formData, setFormData] = useState({ ...profileData });
-  const [uploading, setUploading] = useState({ avatar: false, resume: false });
-  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({ ...profileData })
+  const [uploading, setUploading] = useState({ avatar: false, resume: false })
+  const [saving, setSaving] = useState(false)
 
   // ✅ Input handler
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   // ✅ Image upload logic
   const handleImageUpload = async (file, type) => {
-    setUploading((prev) => ({ ...prev, [type]: true }));
+    setUploading((prev) => ({ ...prev, [type]: true }))
     try {
-      const imgUploadRes = await uploadImage(file);
-      const imageUrl = imgUploadRes.imageUrl || '';
+      const imgUploadRes = await uploadImage(file)
+      const imageUrl = imgUploadRes.imageUrl || ''
 
       setFormData((prev) => ({
         ...prev,
         [type]: imageUrl,
-      }));
+      }))
     } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Image upload failed. Please try again.');
+      console.error('Image upload failed:', error)
+      toast.error('Image upload failed. Please try again.')
     } finally {
-      setUploading((prev) => ({ ...prev, [type]: false }));
+      setUploading((prev) => ({ ...prev, [type]: false }))
     }
-  };
+  }
 
   // ✅ File input change
   const handleFileChange = (e, type) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
-      handleImageUpload(file, type);
+      handleImageUpload(file, type)
     }
-  };
+  }
 
   // ✅ Save profile
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true)
     try {
-      const response = await axiosInstance.put(
-        API_PATHS.AUTH.UPDATE_PROFILE,
-        formData
-      );
+      const response = await axiosInstance.put(API_PATHS.AUTH.UPDATE_PROFILE, formData)
 
       if (response.status === 200) {
-        toast.success('Profile details updated successfully');
-        setProfileData({ ...formData });
-        updateUser({ ...formData });
+        toast.success('Profile details updated successfully')
+        setProfileData({ ...formData })
+        updateUser({ ...formData })
       }
     } catch (error) {
-      console.error(error);
-      toast.error('Failed to update profile. Please try again.');
+      console.error(error)
+      toast.error('Failed to update profile. Please try again.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   // ✅ Cancel edit
   const handleCancel = () => {
-    setFormData({ ...profileData });
-  };
+    setFormData({ ...profileData })
+  }
 
   // ✅ Delete resume
   const handleDeleteResume = async () => {
-    setSaving(true);
+    setSaving(true)
     try {
       const response = await axiosInstance.post(API_PATHS.AUTH.DELETE_RESUME, {
         resumeUrl: user?.resume || '',
-      });
+      })
 
       if (response.status === 200) {
-        toast.success('Resume deleted successfully');
-        setProfileData((prev) => ({ ...prev, resume: '' }));
-        updateUser({ ...user, resume: '' });
+        toast.success('Resume deleted successfully')
+        setProfileData((prev) => ({ ...prev, resume: '' }))
+        updateUser({ ...user, resume: '' })
       }
     } catch (error) {
-      console.error(error);
-      toast.error('Failed to delete resume. Please try again.');
+      console.error(error)
+      toast.error('Failed to delete resume. Please try again.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   // ✅ Sync user data when it changes
   useEffect(() => {
@@ -112,10 +109,10 @@ const UserProfile = () => {
       email: user?.email || '',
       avatar: user?.avatar || '',
       resume: user?.resume || '',
-    };
-    setProfileData({ ...userData });
-    setFormData({ ...userData });
-  }, [user]);
+    }
+    setProfileData({ ...userData })
+    setFormData({ ...userData })
+  }, [user])
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -240,7 +237,7 @@ const UserProfile = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default UserProfile;
+export default UserProfile

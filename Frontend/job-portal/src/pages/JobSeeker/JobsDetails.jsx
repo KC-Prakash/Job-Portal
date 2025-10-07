@@ -1,62 +1,54 @@
-import {
-  MapPin,
-  DollarSign,
-  Building2,
-  Clock,
-  User,
-  ArrowLeft,
-} from "lucide-react";
-import { useAuth } from "../../context/authContext";
-import { useParams, useNavigate } from "react-router-dom";
-import axiosInstance from "../../utils/axiosInstance";
-import { API_PATHS } from "../../utils/apiPaths";
-import { useEffect, useState } from "react";
-import Navbar from "../../components/Layout/Navbar";
-import moment from "moment";
-import StatusBadge from "../../components/Layout/StatusBadge";
-import toast from "react-hot-toast";
+import { ArrowLeft, Building2, Clock, DollarSign, MapPin, User } from 'lucide-react'
+import moment from 'moment'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useNavigate, useParams } from 'react-router-dom'
+import Navbar from '../../components/Layout/Navbar'
+import StatusBadge from '../../components/Layout/StatusBadge'
+import { useAuth } from '../../context/AuthContext'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
 
 const JobsDetails = () => {
-  const { user } = useAuth();
-  const { jobId } = useParams();
-  const navigate = useNavigate();
+  const { user } = useAuth()
+  const { jobId } = useParams()
+  const navigate = useNavigate()
 
-  const [jobDetails, setJobDetails] = useState(null);
+  const [jobDetails, setJobDetails] = useState(null)
 
   // Fetch job details
   const getJobDetailsById = async () => {
     try {
-      const response = await axiosInstance.get(
-        API_PATHS.JOBS.GET_JOB_BY_ID(jobId),
-        { params: { userId: user?._id || null } }
-      );
-      setJobDetails(response.data);
+      const response = await axiosInstance.get(API_PATHS.JOBS.GET_JOB_BY_ID(jobId), {
+        params: { userId: user?._id || null },
+      })
+      setJobDetails(response.data)
     } catch (error) {
-      toast.error("Failed to fetch job details. Please try again. " + error.message);
-      console.error("Error fetching job details:", error);
+      toast.error('Failed to fetch job details. Please try again. ' + error.message)
+      console.error('Error fetching job details:', error)
     }
-  };
+  }
 
   // Apply to job
   const applyToJob = async () => {
     try {
       if (jobId) {
-        await axiosInstance.post(API_PATHS.APPLICATIONS.APPLY_TO_JOB(jobId));
-        toast.success("Applied to job successfully");
+        await axiosInstance.post(API_PATHS.APPLICATIONS.APPLY_TO_JOB(jobId))
+        toast.success('Applied to job successfully')
       }
-      getJobDetailsById();
+      getJobDetailsById()
     } catch (error) {
-      console.log("Error:", error);
-      const errorMsg = error?.response?.data?.message;
-      toast.error(errorMsg || "Failed to apply to job. Please try again.");
+      console.log('Error:', error)
+      const errorMsg = error?.response?.data?.message
+      toast.error(errorMsg || 'Failed to apply to job. Please try again.')
     }
-  };
+  }
 
   useEffect(() => {
     if (jobId && user) {
-      getJobDetailsById();
+      getJobDetailsById()
     }
-  }, [jobId, user]);
+  }, [jobId, user])
 
   return (
     <div className="bg-gradient-to-b from-green-50 via-white to-emerald-50 min-h-screen">
@@ -125,8 +117,8 @@ const JobsDetails = () => {
                   <Clock className="h-4 w-4" />
                   <span>
                     {jobDetails.createdAt
-                      ? moment(jobDetails.createdAt).format("YYYY-MM-DD")
-                      : "N/A"}
+                      ? moment(jobDetails.createdAt).format('YYYY-MM-DD')
+                      : 'N/A'}
                   </span>
                 </div>
               </div>
@@ -144,14 +136,10 @@ const JobsDetails = () => {
                       <DollarSign className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                        Compensation
-                      </h3>
+                      <h3 className="text-sm font-semibold text-gray-900 mb-1">Compensation</h3>
                       <div className="text-lg font-bold text-gray-900">
                         {jobDetails.salaryMin} - {jobDetails.salaryMax}
-                        <span className="text-lg font-normal text-gray-600 ml-1">
-                          per year
-                        </span>
+                        <span className="text-lg font-normal text-gray-600 ml-1">per year</span>
                       </div>
                     </div>
                   </div>
@@ -193,7 +181,7 @@ const JobsDetails = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default JobsDetails;
+export default JobsDetails

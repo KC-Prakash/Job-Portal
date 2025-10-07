@@ -1,112 +1,107 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Loader, AlertCircle, CheckCircle, X } from 'lucide-react';
-import { validateEmail } from '../../utils/helper';
-import { API_PATHS } from '../../utils/apiPaths';
-import axiosInstance from '../../utils/axiosInstance';
-import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion'
+import { AlertCircle, CheckCircle, Eye, EyeOff, Loader, Lock, Mail, X } from 'lucide-react'
+import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
+import { validateEmail } from '../../utils/helper'
 
 const Login = () => {
-  const {login} = useAuth();
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false
-  });
+    rememberMe: false,
+  })
 
   const [formState, setFormState] = useState({
     loading: false,
     error: {},
     showPassword: false,
-    success: false
-  });
+    success: false,
+  })
 
   const validatePassword = (password) => {
-    if (!password.trim()) return 'Password is required';
-    return '';
-  };
+    if (!password.trim()) return 'Password is required'
+    return ''
+  }
   //Handle input changes
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    const { name, value, type, checked } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+      [name]: type === 'checkbox' ? checked : value,
+    }))
 
     // Clear error when user starts typing
     if (formState.error[name]) {
-      setFormState(prev => ({
+      setFormState((prev) => ({
         ...prev,
-        error: { ...prev.error, [name]: '' }
-      }));
+        error: { ...prev.error, [name]: '' },
+      }))
     }
-  };
+  }
 
   const validateForm = () => {
     const error = {
       email: validateEmail(formData.email),
-      password: validatePassword(formData.password)
-    };
+      password: validatePassword(formData.password),
+    }
     // Remove empty error
-    Object.keys(error).forEach(key => {
-      if (error[key] === '') delete error[key];
-    });
-    setFormState(prev => ({ ...prev, error }));
-    return Object.keys(error).length === 0;
-  };
+    Object.keys(error).forEach((key) => {
+      if (error[key] === '') delete error[key]
+    })
+    setFormState((prev) => ({ ...prev, error }))
+    return Object.keys(error).length === 0
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
-    setFormState(prev => ({ ...prev, loading: true }));
+    setFormState((prev) => ({ ...prev, loading: true }))
 
     try {
-      // Login API Integration 
-      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN,{
+      // Login API Integration
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
         email: formData.email,
         password: formData.password,
-        rememberMe: formData.rememberMe
-      });
-      
-      setFormState(prev => ({
+        rememberMe: formData.rememberMe,
+      })
+
+      setFormState((prev) => ({
         ...prev,
         loading: false,
         success: true,
-        error: {}
-      }));
-      
-      const {token, role} = response.data;
-      
+        error: {},
+      }))
+
+      const { token, role } = response.data
+
       if (token) {
-        login(response.data, token);
+        login(response.data, token)
 
         // Redirect based on role
         setTimeout(() => {
-          window.location.href =
-          role === "employer"
-          ? "/employer-dashboard"
-          :"/find-jobs";
-        }, 2000);
+          window.location.href = role === 'employer' ? '/employer-dashboard' : '/find-jobs'
+        }, 2000)
       }
       //redirect based on user role
       setTimeout(() => {
-        const redirectPath = user.role === 'employer'
-        ? '/employer-dashboard'
-        : '/find-jobs';
-        window.location.href = redirectPath;
-      }, 2000);
+        const redirectPath = user.role === 'employer' ? '/employer-dashboard' : '/find-jobs'
+        window.location.href = redirectPath
+      }, 2000)
     } catch (error) {
-      setFormState(prev => ({
+      setFormState((prev) => ({
         ...prev,
         loading: false,
         error: {
-          submit: error.response?.data?.message || 'Login failed. Please check your credentials.'
-        }
-      }));
+          submit: error.response?.data?.message || 'Login failed. Please check your credentials.',
+        },
+      }))
     }
-  };
+  }
 
   if (formState.success) {
     return (
@@ -118,14 +113,12 @@ const Login = () => {
         >
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
-          <p className="text-gray-600 mb-4">
-            You have been successfully logged in.
-          </p>
+          <p className="text-gray-600 mb-4">You have been successfully logged in.</p>
           <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
           <p className="text-sm text-gray-500 mt-2">Redirecting to your dashboard.</p>
         </motion.div>
       </div>
-    );
+    )
   }
 
   return (
@@ -144,7 +137,9 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
             <div className="relative">
               <Mail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -153,13 +148,15 @@ const Login = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-lg border ${formState.error.email ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300`}
+                className={`w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-lg border ${
+                  formState.error.email ? 'border-red-500' : 'border-gray-300'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300`}
                 placeholder="Enter your email"
               />
               {formData.email && (
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, email: '' }))}
+                  onClick={() => setFormData((prev) => ({ ...prev, email: '' }))}
                   className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
@@ -178,7 +175,9 @@ const Login = () => {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <div className="relative">
               <Lock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -187,14 +186,16 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-12 py-2.5 sm:py-3 rounded-lg border ${formState.error.password ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300`}
+                className={`w-full pl-10 pr-12 py-2.5 sm:py-3 rounded-lg border ${
+                  formState.error.password ? 'border-red-500' : 'border-gray-300'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300`}
                 placeholder="Enter your password"
               />
               <div className="absolute top-1/2 right-3 transform -translate-y-1/2 flex space-x-1">
                 {formData.password && (
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, password: '' }))}
+                    onClick={() => setFormData((prev) => ({ ...prev, password: '' }))}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
@@ -204,11 +205,17 @@ const Login = () => {
                 )}
                 <button
                   type="button"
-                  onClick={() => setFormState(prev => ({ ...prev, showPassword: !prev.showPassword }))}
+                  onClick={() =>
+                    setFormState((prev) => ({ ...prev, showPassword: !prev.showPassword }))
+                  }
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <div className="bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-colors duration-200">
-                    {formState.showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {formState.showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </div>
                 </button>
               </div>
@@ -274,7 +281,7 @@ const Login = () => {
         </form>
       </motion.div>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

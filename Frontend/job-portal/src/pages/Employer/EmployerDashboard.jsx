@@ -1,60 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { API_PATHS } from '../../utils/apiPaths';
-import LoadingSpinner from '../../components/Layout/LoadingSpinner';
-import {
-  Plus,
-  Briefcase,
-  Users,
-  Building2,
-  TrendingUp,
-  CheckCircle2,
-} from 'lucide-react';
-import JobDashboardCard from '../../components/Cards/JobDashboardCard';
-import ApplicatDashboardCard from '../../components/Cards/ApplicatDashboardCard';
-import moment from 'moment';
-
-
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import axiosInstance from '../../utils/axiosInstance'
+import DashboardLayout from '../../components/Layout/DashboardLayout'
+import { API_PATHS } from '../../utils/apiPaths'
+import LoadingSpinner from '../../components/Layout/LoadingSpinner'
+import { Plus, Briefcase, Users, Building2, TrendingUp, CheckCircle2 } from 'lucide-react'
+import JobDashboardCard from '../../components/Cards/JobDashboardCard'
+import ApplicatDashboardCard from '../../components/Cards/ApplicatDashboardCard'
+import moment from 'moment'
 
 const Card = ({ title, subtitle, headerAction, className, children }) => {
-  return <div
-    className={`bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}>
-    {(title || headerAction) && (
-      <div className="flex items-center justify-between p-6 pb-4">
-        <div>
-          {title && (
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          )}
-          {subtitle && (
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
-          )}
+  return (
+    <div
+      className={`bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}
+    >
+      {(title || headerAction) && (
+        <div className="flex items-center justify-between p-6 pb-4">
+          <div>
+            {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
+            {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+          </div>
+          {headerAction}
         </div>
-        {headerAction}
-      </div>
-    )}
-    <div className={title ? "px-6 pb-6" : "p-6"}>{children}</div>
-  </div>
+      )}
+      <div className={title ? 'px-6 pb-6' : 'p-6'}>{children}</div>
+    </div>
+  )
 }
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  trend,
-  trendValue,
-  color = "blue"
-}) => {
+const StatCard = ({ title, value, icon: Icon, trend, trendValue, color = 'blue' }) => {
   const colorClasses = {
-    blue: "from-blue-500 to-blue-600",
-    green: "from-emerald-500 to-emerald-600",
-    purple: "from-violet-500 to-violet-600",
-    orange: "from-orange-500 to-orange-600",
-  };
+    blue: 'from-blue-500 to-blue-600',
+    green: 'from-emerald-500 to-emerald-600',
+    purple: 'from-violet-500 to-violet-600',
+    orange: 'from-orange-500 to-orange-600',
+  }
 
   return (
-    <Card
-      className={`bg-gradient-to-br ${colorClasses[color]} text-white border-0`}>
+    <Card className={`bg-gradient-to-br ${colorClasses[color]} text-white border-0`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-white/80 text-sm font-medium">{title}</p>
@@ -71,30 +53,30 @@ const StatCard = ({
         </div>
       </div>
     </Card>
-  );
-};
+  )
+}
 const EmployerDashboard = () => {
-  const navigate = useNavigate();
-  const [dashboardData, setDashboardData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
+  const [dashboardData, setDashboardData] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const getDashboardOverView = async () => {
     try {
-      setIsLoading(true);
-      const response = await axiosInstance.get(API_PATHS.DASHBOARD.OVERVIEW);
+      setIsLoading(true)
+      const response = await axiosInstance.get(API_PATHS.DASHBOARD.OVERVIEW)
       if (response.status === 200) {
-        setDashboardData(response.data);
+        setDashboardData(response.data)
       }
     } catch (error) {
-      console.log(error);
+      console.log(error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    getDashboardOverView();
-  }, []);
+    getDashboardOverView()
+  }, [])
 
   return (
     <DashboardLayout activeMenu="employer-dashboard">
@@ -105,42 +87,37 @@ const EmployerDashboard = () => {
           {/* Dashboard stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
-              title="Active Jobs"
-              value={dashboardData?.counts?.totalActiveJobs || 0}
-              icon={Briefcase}
-              trend={true}
-              trendValue={`${dashboardData?.counts?.trends?.activeJobs || 0}%`}
-              color="blue"
-            />
-
-            <StatCard
               title="Total Applicants"
               value={dashboardData?.counts?.totalApplicants || 0}
               icon={Users}
               trend={true}
-              trendValue={`${dashboardData?.counts?.trends?.applicants || 0}%`}
+              trendValue={`${dashboardData?.trends?.applicants || 0}%`}
               color="green"
             />
-
+            <StatCard
+              title="Active Jobs"
+              value={dashboardData?.counts?.totalActiveJobs || 0}
+              icon={Briefcase}
+              trend={true}
+              trendValue={`${dashboardData?.trends?.activeJobs || 0}%`}
+              color="blue"
+            />
             <StatCard
               title="Total Hires"
               value={dashboardData?.counts?.totalHires || 0}
               icon={CheckCircle2}
               trend={true}
-              trendValue={`${dashboardData?.counts?.trends?.hires || 0}%`}
+              trendValue={`${dashboardData?.trends?.hires || 0}%`}
               color="orange"
             />
-
             <StatCard
               title="Total Companies"
               value={dashboardData?.counts?.totalCompanies || 0}
               icon={Building2}
               trend={true}
-              trendValue={`${dashboardData?.counts?.trends?.companies || 0}%`}
+              trendValue={`${dashboardData?.trends?.companies || 0}%`}
               color="purple"
             />
-
-
           </div>
           {/* Recent Activities */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -150,17 +127,16 @@ const EmployerDashboard = () => {
               headerAction={
                 <button
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  onClick={() => navigate("/find-jobs")}
+                  onClick={() => navigate('/find-jobs')}
                 >
                   View All
                 </button>
-              }>
+              }
+            >
               <div className="space-y-4">
-                {dashboardData?.data?.recentJobs
-                  ?.slice(0, 3)
-                  ?.map((job, index) => (
-                    <JobDashboardCard key={index} job={job} />
-                  ))}
+                {dashboardData?.data?.recentJobs?.slice(0, 3)?.map((job, index) => (
+                  <JobDashboardCard key={index} job={job} />
+                ))}
               </div>
             </Card>
 
@@ -170,49 +146,45 @@ const EmployerDashboard = () => {
               headerAction={
                 <button
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  onClick={() => navigate("/manage-jobs")}
+                  onClick={() => navigate('/manage-jobs')}
                 >
                   View All
                 </button>
-              }>
+              }
+            >
               <div className="space-y-4">
-                {dashboardData?.data?.recentApplicants
-                  ?.slice(0, 3)
-                  ?.map((data, index) => (
-                    <ApplicatDashboardCard
-                      key={index}
-                      applicant={data?.applicant || ""}
-                      position={data?.job?.title || ""}
-                      time={moment(data?.updatedAt).fromNow()}
-                    />
-                  ))}
+                {dashboardData?.data?.recentApplicants?.slice(0, 3)?.map((data, index) => (
+                  <ApplicatDashboardCard
+                    key={index}
+                    applicant={data?.applicant || ''}
+                    position={data?.job?.title || ''}
+                    time={moment(data?.updatedAt).fromNow()}
+                  />
+                ))}
               </div>
             </Card>
           </div>
           {/* Quick Actions*/}
-          <Card
-            title="Quick Actions"
-            subtitle="Common task to get you started"
-          >
+          <Card title="Quick Actions" subtitle="Common task to get you started">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
                 {
-                  title: "Post New Job",
+                  title: 'Post New Job',
                   icon: Plus,
-                  color: "bg-blue-50 text-blue-700",
-                  path: "/post-job",
+                  color: 'bg-blue-50 text-blue-700',
+                  path: '/post-job',
                 },
                 {
-                  title: "Review Applications",
+                  title: 'Review Applications',
                   icon: Users,
-                  color: "bg-green-50 text-green-700",
-                  path: "/manage-jobs",
+                  color: 'bg-green-50 text-green-700',
+                  path: '/manage-jobs',
                 },
                 {
-                  title: "Company Setting",
+                  title: 'Company Setting',
                   icon: Building2,
-                  color: "bg-orange-50 text-orange-700",
-                  path: "/company-profile",
+                  color: 'bg-orange-50 text-orange-700',
+                  path: '/company-profile',
                 },
               ].map((action, index) => (
                 <button
@@ -223,9 +195,7 @@ const EmployerDashboard = () => {
                   <div className={`p-2 rounded-lg ${action.color}`}>
                     <action.icon className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-gray-900">
-                    {action.title}
-                  </span>
+                  <span className="font-medium text-gray-900">{action.title}</span>
                 </button>
               ))}
             </div>
@@ -233,7 +203,7 @@ const EmployerDashboard = () => {
         </div>
       )}
     </DashboardLayout>
-  );
-};
+  )
+}
 
-export default EmployerDashboard;
+export default EmployerDashboard

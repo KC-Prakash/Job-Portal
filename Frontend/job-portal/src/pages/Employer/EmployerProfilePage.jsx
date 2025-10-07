@@ -1,90 +1,87 @@
-import { useState } from 'react';
-import { Building2, Mail, Edit3 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import axiosInstance from '../../utils/axiosInstance';
-import { API_PATHS } from '../../utils/apiPaths';
-import toast from 'react-hot-toast';
-import uploadImage from '../../utils/uploadimage';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
-import EditProfileDetails from './EditProfileDetails';
+import { Building2, Edit3, Mail } from 'lucide-react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import DashboardLayout from '../../components/Layout/DashboardLayout'
+import { useAuth } from '../../context/AuthContext'
+import { API_PATHS } from '../../utils/apiPaths'
+import axiosInstance from '../../utils/axiosInstance'
+import uploadImage from '../../utils/uploadimage'
+import EditProfileDetails from './EditProfileDetails'
 
 const EmployerProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser } = useAuth()
 
   const [profileData, setProfileData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    avatar: user?.avatar || "",
-    companyName: user?.companyName || "",
-    companyDescription: user?.companyDescription || "",
-    companyLogo: user?.companyLogo || "",
-  });
+    name: user?.name || '',
+    email: user?.email || '',
+    avatar: user?.avatar || '',
+    companyName: user?.companyName || '',
+    companyDescription: user?.companyDescription || '',
+    companyLogo: user?.companyLogo || '',
+  })
 
-  const [editModal, setEditModal] = useState(false);
-  const [formData, setFormData] = useState({ ...profileData });
-  const [uploading, setUploading] = useState({ avatar: false, logo: false });
-  const [saving, setSaving] = useState(false);
+  const [editModal, setEditModal] = useState(false)
+  const [formData, setFormData] = useState({ ...profileData })
+  const [uploading, setUploading] = useState({ avatar: false, logo: false })
+  const [saving, setSaving] = useState(false)
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   const handleImageUpload = async (file, type) => {
-    setUploading((prev) => ({ ...prev, [type]: true }));
+    setUploading((prev) => ({ ...prev, [type]: true }))
 
     try {
-      const imgUploadRes = await uploadImage(file);
-      const imageUrl = imgUploadRes.imageUrl || "";
+      const imgUploadRes = await uploadImage(file)
+      const imageUrl = imgUploadRes.imageUrl || ''
 
-      const field = type === "avatar" ? "avatar" : "companyLogo";
-      handleInputChange(field, imageUrl);
+      const field = type === 'avatar' ? 'avatar' : 'companyLogo'
+      handleInputChange(field, imageUrl)
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error('Error uploading image:', error)
     } finally {
-      setUploading((prev) => ({ ...prev, [type]: false }));
+      setUploading((prev) => ({ ...prev, [type]: false }))
     }
-  };
+  }
 
   const handleImageChange = (e, type) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      const field = type === "avatar" ? "avatar" : "companyLogo";
+      const previewUrl = URL.createObjectURL(file)
+      const field = type === 'avatar' ? 'avatar' : 'companyLogo'
 
-      handleInputChange(field, previewUrl);
-      handleImageUpload(file, type);
+      handleInputChange(field, previewUrl)
+      handleImageUpload(file, type)
     }
-  };
+  }
 
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true)
 
     try {
-      const response = await axiosInstance.put(
-        API_PATHS.AUTH.UPDATE_PROFILE,
-        formData
-      );
+      const response = await axiosInstance.put(API_PATHS.AUTH.UPDATE_PROFILE, formData)
 
       if (response.status === 200) {
-        toast.success("Profile Details Updated Successfully");
-        setProfileData({ ...formData });
-        updateUser({ ...formData });
-        setEditModal(false);
+        toast.success('Profile Details Updated Successfully')
+        setProfileData({ ...formData })
+        updateUser({ ...formData })
+        setEditModal(false)
       }
     } catch (error) {
-      console.error("Profile update failed:", error);
+      console.error('Profile update failed:', error)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const handleCancel = () => {
-    setFormData({ ...profileData });
-    setEditModal(false);
-  };
+    setFormData({ ...profileData })
+    setEditModal(false)
+  }
 
   if (editModal) {
     return (
@@ -97,7 +94,7 @@ const EmployerProfilePage = () => {
         saving={saving}
         uploading={uploading}
       />
-    );
+    )
   }
 
   return (
@@ -107,9 +104,7 @@ const EmployerProfilePage = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6 flex items-center justify-between">
-              <h1 className="text-xl font-medium text-white">
-                Employer Profile
-              </h1>
+              <h1 className="text-xl font-medium text-white">Employer Profile</h1>
               <button
                 onClick={() => setEditModal(true)}
                 className="bg-white/10 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
@@ -135,9 +130,7 @@ const EmployerProfilePage = () => {
                       className="w-25 h-25 rounded-xl object-cover border-2 border-gray-500"
                     />
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {profileData.name}
-                      </h3>
+                      <h3 className="text-lg font-semibold text-gray-800">{profileData.name}</h3>
                       <div className="flex items-center text-sm text-gray-500 mt-1">
                         <Mail className="w-4 h-4 mr-2" />
                         <span>{profileData.email}</span>
@@ -185,7 +178,7 @@ const EmployerProfilePage = () => {
         </div>
       </div>
     </DashboardLayout>
-  );
-};
+  )
+}
 
-export default EmployerProfilePage;
+export default EmployerProfilePage
